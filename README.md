@@ -1,11 +1,21 @@
-bembe-code-translator/
+bemba-code-platform/
 │
-├── package.json
-├── server.js
-├── translator.js
+├── backend/
+│   ├── app.py
+│   ├── translator.py
+│   ├── auth.py
+│   ├── requirements.txt
+│   ├── Dockerfile
+│   └── .env.example
+│
+├── frontend/
+│   ├── index.html
+│   ├── script.js
+│   └── style.css
+│
+├── database/
+│   └── schema.sql
+│
+├── docker-compose.yml
 ├── .gitignore
-│
-└── public/
-      ├── index.html
-      ├── style.css
-      └── script
+└── README.md
