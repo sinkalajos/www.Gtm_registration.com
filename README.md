@@ -19,3 +19,4 @@ Containerization: Docker
 Frontend: Vercel
 Backend: Render
 Database: Supabase
+
