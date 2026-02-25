@@ -1,0 +1,67 @@
+app.py
+from flask import Flask, request, jsonify
+import subprocess
+import tempfile
+import os
+import uuid
+
+app = Flask(__name__)
+
+KEYWORD_MAP = {
+    "nga": "if",
+    "kabili": "else",
+    "sosa": "print",
+    "pa": ">",
+    "panshi": "<",
+    "cine": "True",
+    "ubufi": "False"
+}
+
+def translate_code(code):
+    for bemba, python_kw in KEYWORD_MAP.items():
+        code = code.replace(bemba, python_kw)
+    return code
+
+def run_in_docker(code):
+    file_id = str(uuid.uuid4())
+    filename = f"{file_id}.py"
+
+    with open(filename, "w") as f:
+        f.write(code)
+
+    try:
+        result = subprocess.run(
+            [
+                "docker", "run", "--rm",
+                "--memory=100m",
+                "--cpus=0.5",
+                "-v", f"{os.getcwd()}:/app",
+                "python:3.10",
+                "python", f"/app/{filename}"
+            ],
+            capture_output=True,
+            text=True,
+            timeout=5
+        )
+
+        return result.stdout + result.stderr
+
+    except subprocess.TimeoutExpired:
+        return "Execution timed out."
+
+    finally:
+        os.remove(filename)
+
+@app.route("/run", methods=["POST"])
+def run_code():
+    user_code = request.json.get("code", "")
+    translated = translate_code(user_code)
+    output = run_in_docker(translated)
+
+    return jsonify({
+        "translated_code": translated,
+        "output": output
+    })
+
+if __name__ == "__main__":
+    app.run()
